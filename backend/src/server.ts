@@ -5,6 +5,9 @@ import cookieParser from "cookie-parser";
 import connectDB from "./config/db";
 
 import authRoute from "./routes/auth.route";
+import itemsRoute from "./routes/expanse";
+
+
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -33,6 +36,7 @@ app.get("/health", (_req, res) => {
 });
 
 app.use("/api", authRoute);
+app.use("/api", itemsRoute);
 
 
 app.get("/", (_req, res) => {

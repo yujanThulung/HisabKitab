@@ -1,8 +1,8 @@
 import multer from "multer";
 import { Request, Response, NextFunction } from "express";
-import { avatarStorage, fileStorage } from "../config/cloudinary";
+import { imageStorage, fileStorage } from "../config/cloudinary";
 
-const AVATAR_MAX_SIZE = 5 * 1024 * 1024;
+const IMAGE_MAX_SIZE = 5 * 1024 * 1024;
 const FILE_MAX_SIZE = 50 * 1024 * 1024;
 
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
@@ -47,13 +47,13 @@ const normalizeUpload = (req: Request, _res: Response, next: NextFunction): void
     next();
 };
 
-// Avatar upload 
-const avatarMulter = multer({
-    storage: avatarStorage,
-    limits: { fileSize: AVATAR_MAX_SIZE },
+// image upload 
+const imageMulter = multer({
+    storage: imageStorage,
+    limits: { fileSize: IMAGE_MAX_SIZE },
     fileFilter: (_req, file, cb) => {
         if (!ALLOWED_IMAGE_TYPES.includes(file.mimetype)) {
-            return cb(new Error("Only image files are allowed for avatars"));
+            return cb(new Error("Only image files are allowed for images"));
         }
         cb(null, true);
     },
@@ -72,7 +72,7 @@ const fileMulter = multer({
 });
 
 // Exported as arrays so normalizeUpload always runs after multer
-export const uploadAvatar = [avatarMulter.single("avatar"), normalizeUpload];
+export const uploadimage = [imageMulter.single("image"), normalizeUpload];
 export const uploadFile = [fileMulter.single("file"), normalizeUpload];
 
 //Shared error handler 

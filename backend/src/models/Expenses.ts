@@ -1,11 +1,11 @@
 import mongoose, { Document, Schema } from "mongoose";
 
-export interface IExpense {
-    id: string;
+export interface IExpense extends Document {
     title: string;
     amount: number;
-    image: string;
-    note: string;
+    image?: string | null;
+    imagePublicId?: string | null;
+    note?: string;
     date: Date;
     userId: mongoose.Types.ObjectId;
     createdAt: Date;
@@ -13,18 +13,24 @@ export interface IExpense {
 }
 
 const ExpenseSchema = new Schema<IExpense>({
-    title: { type: String, required: true },
-    amount: { type: Number, required: true },
-    image: { type: String },
-    note: { type: String },
-    date: { type: Date, required: true },
+    title: { type: String, required: true, trim: true },
+    amount: { type: Number, required: true, min: 0 },
+    image: { type: String, default: "" },
+    imagePublicId: { type: String, default: null, },
+    note: { type: String, default: "" },
+    date: {
+        type: Date, required: true, validate: {
+            validator: function (value: Date) {
+                return value <= new Date();
+            }
+        }
+    },
     userId: { type: mongoose.Types.ObjectId, ref: "User", required: true }
 }, {
     timestamps: true
 })
 
-ExpenseSchema.index({ title: 1, date: 1 }, { unique: true });
-
+ExpenseSchema.index({ userId: 1, title: 1, date: 1, }, { unique: true, });
 const Expense = mongoose.model<IExpense>("Expense", ExpenseSchema);
 
 export default Expense;

@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { v2 as cloudinary } from 'cloudinary';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
 
@@ -7,10 +8,10 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-export const avatarStorage = new CloudinaryStorage({
+export const imageStorage = new CloudinaryStorage({
     cloudinary,
     params: async (_req, file) => ({
-        folder: 'nexhub/avatars',
+        folder: 'hisabkitab/images',
         allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
         transformation: [{ width: 400, height: 400, crop: 'fill', gravity: 'face' }],
         public_id: `${Date.now()}-${file.originalname.split('.')[0]}`,
@@ -21,11 +22,11 @@ export const fileStorage = new CloudinaryStorage({
     cloudinary,
     params: async (_req, file) => {
         let resourceType = 'auto';
-        let folder = 'nexhub/others';
+        let folder = 'hisabkitab/others';
 
-        if (file.mimetype.startsWith('image/')) folder = 'nexhub/images';
-        else if (file.mimetype.startsWith('video/')) folder = 'nexhub/videos';
-        else if (file.mimetype.startsWith('audio/')) folder = 'nexhub/audio';
+        if (file.mimetype.startsWith('image/')) folder = 'hisabkitab/images';
+        else if (file.mimetype.startsWith('video/')) folder = 'hisabkitab/videos';
+        else if (file.mimetype.startsWith('audio/')) folder = 'hisabkitab/audio';
 
         return {
             folder,
