@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import mongoose from "mongoose";
 import { sendError } from "../utils/response";
-import Message from "../models/Message";
 import multer from "multer";
 
 export const errorHandler = (

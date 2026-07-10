@@ -61,20 +61,20 @@ export const sendError = ({
 
 export const ApiResponse = {
     ok: <T>(res: Response, message: string, data?: T) =>
-        sendSuccess({ res, statusCode: 200, message, data }),
+        sendSuccess({ res, statusCode: 200, message, ...(data !== undefined && { data }) }),
 
     created: <T>(res: Response, message: string, data?: T) =>
-        sendSuccess({ res, statusCode: 201, message, data }),
+        sendSuccess({ res, statusCode: 201, message, ...(data !== undefined && { data }) }),
 
     list: <T>(
         res: Response,
         message: string,
         data: T,
         pagination?: PaginationMeta
-    ) => sendSuccess({ res, statusCode: 200, message, data, pagination }),
+    ) => sendSuccess({ res, statusCode: 200, message, data, ...(pagination !== undefined && { pagination }) }),
 
     badRequest: (res: Response, message: string, errors?: Record<string, string | string[]>) =>
-        sendError({ res, statusCode: 400, message, errors }),
+        sendError({ res, statusCode: 400, message, ...(errors !== undefined && { errors }) }),
 
     unauthorized: (res: Response, message = "Unauthorized") =>
         sendError({ res, statusCode: 401, message }),

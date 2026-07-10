@@ -1,20 +1,21 @@
 {
   "name": "clear",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "dist/server.js",
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^2.2.0",
     "@types/node": "^26.1.0",
-    "tsx": "^4.23.0",
-    "typescript": "^6.0.3"
+    "tsx": "^4.23.0"
   },
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
+    "postinstall": "npm run build",
     "prestart": "npm run build",
     "start": "node dist/server.js"
   },
@@ -32,6 +33,7 @@
     "mongoose": "^9.7.4",
     "multer": "^2.2.0",
     "multer-storage-cloudinary": "^4.0.0",
+    "typescript": "^6.0.3",
     "zod": "^4.4.3"
   }
 }
