@@ -16,21 +16,13 @@ const ALLOWED_FILE_TYPES = [
     "text/plain",
 ];
 
-//  Normalized shape  what controllers always read       
+// Normalized shape what controllers always read       
 export interface UploadedFile {
     url: string;
     publicId: string;
     mimetype: string;
     size: number;
     originalName: string;
-}
-
-declare global {
-    namespace Express {
-        interface Request {
-            uploadedFile?: UploadedFile;
-        }
-    }
 }
 
 // Normalizer - runs after multer, before the controller

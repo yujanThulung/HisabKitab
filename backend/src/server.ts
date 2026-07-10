@@ -3,9 +3,10 @@ import cors from "cors";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import connectDB from "./config/db";
+import { errorHandler } from "./middleware/errorHandler";
 
 import authRoute from "./routes/auth.route";
-import itemsRoute from "./routes/expanse";
+import expanseRoute from "./routes/expanse.route";
 
 
 dotenv.config();
@@ -36,7 +37,7 @@ app.get("/health", (_req, res) => {
 });
 
 app.use("/api", authRoute);
-app.use("/api", itemsRoute);
+app.use("/api", expanseRoute);
 
 
 app.get("/", (_req, res) => {

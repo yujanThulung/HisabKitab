@@ -148,15 +148,23 @@ export const logout = async (req: Request, res: Response) => {
         const refreshToken = req.cookies.refreshToken;
         if (refreshToken) {
             const hashedToken = hashToken(refreshToken);
-            await User.updateOne({ refreshToken: hashToken(refreshToken) },
-                { $set: { refreshToken: "" } });
+            await User.updateOne(
+                { refreshToken: hashedToken },
+                { $set: { refreshToken: "" } }
+            );
         }
 
         res.clearCookie("refreshToken", {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: "strict",
-        })
+        });
+
+        sendSuccess({
+            res,
+            statusCode: 200,
+            message: "Logged out successfully"
+        });
     } catch (error) {
         console.error("Error in logout controller:", error);
         sendError({ res, statusCode: 500, message: "Internal server error" });
