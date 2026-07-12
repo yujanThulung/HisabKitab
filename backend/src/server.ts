@@ -61,27 +61,33 @@ app.use((_req, res) => {
 })
 
 const startServer = async () => {
-  await connectDB();
+  try {
+    await connectDB();
 
-  const server = app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-  });
+    const server = app.listen(Number(PORT), "0.0.0.0", () => {
+      console.log(`Server is running on port ${PORT}`);
+    });
 
-  const shutdown = (signal: string) => {
-    console.log(`${signal} received, gracefully shutting down...`)
-    server.close(() => {
-      console.log("HTTP server closed");
-      process.exit(0);
-    })
+    const shutdown = (signal: string) => {
+      console.log(`${signal} received, gracefully shutting down...`)
+      server.close(() => {
+        console.log("HTTP server closed");
+        process.exit(0);
+      })
 
-    setTimeout(() => {
-      console.error("Forcing server shutdown...");
-      process.exit(0);
-    }, 1000)
+      setTimeout(() => {
+        console.error("Forcing server shutdown...");
+        process.exit(0);
+      }, 1000)
+    }
+
+    process.on("SIGTERM", () => shutdown("SIGTERM"));
+    process.on("SIGINT", () => shutdown("SIGINT"));
+  } catch (error) {
+    console.error("Failed to start server:", error);
+    process.exit(1);
+
   }
-
-  process.on("SIGTERM", () => shutdown("SIGTERM"));
-  process.on("SIGINT", () => shutdown("SIGINT"));
 }
 
 startServer().catch((error) => {
