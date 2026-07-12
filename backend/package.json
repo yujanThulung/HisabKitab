@@ -15,8 +15,6 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
-    "postinstall": "npm run build",
-    "prestart": "npm run build",
     "start": "node dist/server.js"
   },
   "author": "",
