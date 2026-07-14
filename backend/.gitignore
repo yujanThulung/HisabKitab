@@ -28,6 +28,7 @@ src/**/*.d.ts.map
 
 # Dist folder (uncomment to ignore, but keep for Vercel)
 # dist/
+*dist/
 
 # IDE
 .vscode/*

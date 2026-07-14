@@ -14,7 +14,7 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 
 app.use(cors({
-  origin: process.env.CLIENT_URL || "http://localhost:3000", credentials: true,
+  origin: process.env.CLIENT_URL ? process.env.CLIENT_URL : (origin, callback) => callback(null, true),
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   allowedHeaders: ["Content-Type", "Authorization"]
 }))
