@@ -21,4 +21,6 @@ export const loginSchema = z.object(
             .min(8, "Password must be at least 8 characters")
             .max(128, "Password too long"),
     }
-)
+).refine((data) => data.email || data.phone, {
+    message: "Either email or phone is required",
+})

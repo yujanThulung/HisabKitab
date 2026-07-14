@@ -13,6 +13,7 @@ export const register = async (req: Request, res: Response) => {
 
         if (existing) {
             sendError({ res, statusCode: 400, message: "User already exists with this email or phone number" });
+            return;
         }
 
         const passwordHash = await bcrypt.hash(password, 12);
@@ -157,7 +158,7 @@ export const logout = async (req: Request, res: Response) => {
         res.clearCookie("refreshToken", {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
-            sameSite: "strict",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         });
 
         sendSuccess({
