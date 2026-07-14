@@ -3,7 +3,6 @@ import PublicRoute from "./PublicRoute";
 import { PATHS, protectedRoutes, publicRoutes } from "../constants/route";
 import ProtectedRoute from "./ProtectedRoute";
 import AuthLayout from "../layouts/AuthLayout";
-import Dashboard from "../pages/dashboard/Dashboard";
 
 const AppRoutes = () => {
   return (
@@ -14,14 +13,12 @@ const AppRoutes = () => {
             <Route key={path} path={path} element={element} />
           ))}
         </Route>
+      </Route>
 
-        <Route element={<ProtectedRoute />}>
-          <Route element={<Dashboard />}>
-            {protectedRoutes.map(({ path, element }) => (
-              <Route key={path} path={path} element={element} />
-            ))}
-          </Route>
-        </Route>
+      <Route element={<ProtectedRoute />}>
+        {protectedRoutes.map(({ path, element }) => (
+          <Route key={path} path={path} element={element} />
+        ))}
       </Route>
 
       <Route

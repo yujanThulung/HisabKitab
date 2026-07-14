@@ -9,7 +9,6 @@ import type { AuthResponse, LoginPayload, User } from "../types/auth";
 interface AuthState {
     user: User | null;
     accessToken: string | null;
-    isAuthenticated: boolean;
     loading: boolean;
     login: (payload: LoginPayload) => Promise<void>;
     logout: () => Promise<void>;
@@ -24,10 +23,6 @@ export const useAuthStore = create<AuthState>()(
             user: null,
             accessToken: null,
             loading: false,
-
-            get isAuthenticated() {
-                return !!get().accessToken;
-            },
 
             login: async (payload) => {
                 set({ loading: true });
