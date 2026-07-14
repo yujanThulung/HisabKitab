@@ -13,11 +13,13 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-app.use(cors({
-  origin: process.env.CLIENT_URL ? process.env.CLIENT_URL : (origin, callback) => callback(null, true),
-  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-  allowedHeaders: ["Content-Type", "Authorization"]
-}))
+app.use(
+  cors({
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -38,6 +40,11 @@ app.get("/health", (_req, res) => {
 
 app.use("/api", authRoute);
 app.use("/api", expanseRoute);
+
+// Backward compat: /api/login -> /api/auth/login
+app.all("/api/login", (req, res) => {
+  res.redirect(307, "/api/auth/login");
+});
 
 
 app.get("/", (_req, res) => {
