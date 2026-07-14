@@ -21,3 +21,5 @@ const DashboardLayout = () => {
     </Layout>
   );
 };
+
+export default DashboardLayout;
