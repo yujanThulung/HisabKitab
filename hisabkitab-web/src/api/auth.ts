@@ -13,8 +13,7 @@ export const login = async (
     const isEmail = payload.identifier.includes("@");
 
     const response = await api.post("/login", {
-        email: isEmail ? payload.identifier : "",
-        phone: isEmail ? "": payload.identifier,
+        ...(isEmail ? { email: payload.identifier } : { phone: payload.identifier }),
         password: payload.password,
     });
 

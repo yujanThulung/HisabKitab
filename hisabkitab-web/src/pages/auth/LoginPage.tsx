@@ -6,7 +6,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { PATHS } from "../../constants/route";
 import { useAuthStore } from "../../store/authStore";
 import { loginSchema } from "../../validators/auth.validator";
-import type {LoginFormData} from "../../validators/auth.validator" 
+import type { LoginFormData } from "../../validators/auth.validator";
 
 const { Title, Text } = Typography;
 
@@ -26,16 +26,22 @@ const Login = () => {
 
   const onSubmit = async (values: LoginFormData) => {
     try {
-      await login(values);
+      const identifier = values.identifier ?? "";
+      const payload = {
+        identifier,
+        password: values.password,
+        ...(identifier.includes("@") ? { email: identifier } : { phone: identifier }),
+      };
+
+      await login(payload);
 
       message.success("Login successful");
-
       navigate(PATHS.DASHBOARD);
     } catch (error: any) {
       message.error(error.response?.data?.message ?? "Login failed");
     }
   };
-
+  
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-100 px-4">
       <Card className="w-full max-w-md shadow-lg">
