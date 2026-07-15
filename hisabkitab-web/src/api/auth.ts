@@ -3,7 +3,8 @@ import api from "./axios";
 import type {
     LoginPayload,
     RegisterPayload,
-    AuthResponse
+    AuthResponse,
+    RefreshTokenResponse
 } from "../types/auth";
 
 
@@ -28,4 +29,9 @@ export const register = async (payload: RegisterPayload) => {
 
 export const logout = async () => {
     await api.post("/logout")
+}
+
+export const refreshAccessToken = async (refreshToken: string): Promise<RefreshTokenResponse> => {
+    const response = await api.post("/auth/refresh-token", { refreshToken });
+    return response.data.data;
 }
