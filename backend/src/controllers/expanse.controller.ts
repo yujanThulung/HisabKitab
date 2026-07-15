@@ -39,13 +39,13 @@ export const createItem = async (req: Request, res: Response) => {
             return;
         }
 
-        if (!req.uploadedFile) {
-            sendError({ res, statusCode: 400, message: "Image is required" });
-            return;
-        }
+        // if (!req.uploadedFile) {
+        //     sendError({ res, statusCode: 400, message: "Image is required" });
+        //     return;
+        // }
 
-        const image = req.uploadedFile.url;
-        const imagePublicId = req.uploadedFile.publicId;
+        const image = req.uploadedFile?.url;
+        const imagePublicId = req.uploadedFile?.publicId;
 
         const expense = await Expense.create({
             title,
