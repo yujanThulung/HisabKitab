@@ -7,6 +7,7 @@ import { PATHS } from "../../constants/route";
 import { useAuthStore } from "../../store/authStore";
 import { loginSchema } from "../../validators/auth.validator";
 import type { LoginFormData } from "../../validators/auth.validator";
+import { getErrorMessage } from "../../utils/error";
 
 const { Title, Text } = Typography;
 
@@ -37,8 +38,8 @@ const Login = () => {
 
       message.success("Login successful");
       navigate(PATHS.DASHBOARD);
-    } catch (error: any) {
-      message.error(error.response?.data?.message ?? "Login failed");
+    } catch (error) {
+      message.error(getErrorMessage(error, "Login failed"));
     }
   };
   

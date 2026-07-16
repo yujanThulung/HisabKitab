@@ -2,13 +2,15 @@ import type { ReactNode } from "react";
 
 import Login from "../pages/auth/LoginPage";
 // import Register from "../pages/auth/Register";
-import Dashboard from "../pages/dashboard/Dashboard";
+import DashboardEnhanced from "../pages/dashboard/DashboardEnhanced";
+import ExpensePage from "../pages/daily-items/ExpensePage";
 
 export const PATHS = {
   HOME: "/",
   LOGIN: "/login",
   REGISTER: "/register",
   DASHBOARD: "/dashboard",
+  EXPENSES: "/expenses",
 } as const;
 
 export interface AppRoute {
@@ -30,6 +32,10 @@ export const publicRoutes: AppRoute[] = [
 export const protectedRoutes: AppRoute[] = [
   {
     path: PATHS.DASHBOARD,
-    element: <Dashboard />,
+    element: <DashboardEnhanced />,
+  },
+  {
+    path: PATHS.EXPENSES,
+    element: <ExpensePage />,
   },
 ];
