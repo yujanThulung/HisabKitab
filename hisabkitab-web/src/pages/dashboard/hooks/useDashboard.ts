@@ -132,7 +132,7 @@ export function useDashboard() {
    * so the backend receives the exact resolved pay-graph.
    */
   const handleSettle = async (): Promise<boolean> => {
-    const { userBreakdown, grandTotal, perPersonShare } = data;
+    const { userBreakdown } = data;
 
     // Build transactions list (greedy balance resolution)
     const creditors = userBreakdown
@@ -160,19 +160,20 @@ export function useDashboard() {
       if (debtors[j].remaining < 1e-9) j++;
     }
 
-    const payload: CreateSettlementDto = {
-      periodFrom: dateRange[0].toISOString(),
-      periodTo: dayjs().toISOString(),
-      transactions,
-      userSnapshot: userBreakdown.map(u => ({
-        userId: u.userId,
-        name: u.name,
-        totalAmount: u.totalAmount,
-        balance: u.balance,
-      })),
-      totalAmount: grandTotal,
-      perPersonShare,
-    };
+    // Payload for the settlement API call (backend not yet ready)
+    // const payload: CreateSettlementDto = {
+    //   periodFrom: dateRange[0].toISOString(),
+    //   periodTo: dayjs().toISOString(),
+    //   transactions,
+    //   userSnapshot: userBreakdown.map(u => ({
+    //     userId: u.userId,
+    //     name: u.name,
+    //     totalAmount: u.totalAmount,
+    //     balance: u.balance,
+    //   })),
+    //   totalAmount: grandTotal,
+    //   perPersonShare,
+    // };
 
     setSettling(true);
     try {

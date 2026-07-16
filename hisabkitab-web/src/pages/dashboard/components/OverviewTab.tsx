@@ -1,7 +1,17 @@
 import { Card, Row, Col, Statistic, Empty } from 'antd';
 import { ShoppingCartOutlined, TeamOutlined, SwapOutlined } from '@ant-design/icons';
-import { Column } from '@ant-design/plots';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+import { Bar } from 'react-chartjs-2';
 import type { DashboardData } from '../hooks/useDashboard';
+
+ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
 interface OverviewTabProps {
   data: DashboardData;
@@ -12,6 +22,40 @@ const OverviewTab = ({ data }: OverviewTabProps) => {
     person: u.name,
     amount: u.totalAmount,
   }));
+
+  const barChartData = {
+    labels: chartData.map(d => d.person),
+    datasets: [
+      {
+        label: 'Amount Spent',
+        data: chartData.map(d => d.amount),
+        backgroundColor: '#ff6b35',
+        borderRadius: 8,
+      },
+    ],
+  };
+
+  const barChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: (ctx: { parsed: { y: number | null } }) =>
+            `₹${Number(ctx.parsed.y ?? 0).toLocaleString()}`,
+        },
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          callback: (value: string | number) => `₹${Number(value).toLocaleString()}`,
+        },
+      },
+    },
+  };
 
   return (
     <>
@@ -58,25 +102,9 @@ const OverviewTab = ({ data }: OverviewTabProps) => {
         <Col xs={24}>
           <Card title={<span style={{ color: '#ff6b35', fontWeight: 600 }}>Who Spent How Much</span>}>
             {chartData.length > 0 ? (
-              <Column
-                data={chartData}
-                xField="person"
-                yField="amount"
-                columnStyle={{
-                  radius: [8, 8, 0, 0],
-                  fill: 'l(270) 0:#ff6b35 1:#ffa552',
-                }}
-                label={{
-                  position: 'top',
-                  formatter: (v: { amount: number }) => `₹${Number(v.amount).toLocaleString()}`,
-                  style: { fill: '#333', fontSize: 12, fontWeight: 600 },
-                }}
-                yAxis={{
-                  label: {
-                    formatter: (v: string) => `₹${Number(v).toLocaleString()}`,
-                  },
-                }}
-              />
+              <div style={{ height: 580, width: '100%' }}>
+                <Bar data={barChartData} options={barChartOptions} />
+              </div>
             ) : (
               <Empty description="No purchase data" />
             )}

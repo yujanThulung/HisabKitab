@@ -85,7 +85,7 @@ const AppHeader = ({
           icon={<PlusOutlined />}
           onClick={onAddPurchase}
           style={{
-            background: 'linear-gradient(135deg, #ff6b35 0%, #ffa552 100%)',
+            background: '#ff6b35',
             border: 'none',
             boxShadow: '0 4px 12px rgba(255, 107, 53, 0.3)',
           }}

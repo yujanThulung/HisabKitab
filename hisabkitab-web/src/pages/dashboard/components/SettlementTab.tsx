@@ -6,7 +6,7 @@ import {
 import {
   CheckCircleOutlined, ExclamationCircleOutlined, ThunderboltOutlined,
 } from '@ant-design/icons';
-import dayjs, { type Dayjs } from 'dayjs';
+import { type Dayjs } from 'dayjs';
 import type { DashboardData } from '../hooks/useDashboard';
 
 interface SettlementTabProps {
@@ -107,7 +107,7 @@ const SettlementTab = ({ data, lastSettledAt, settling, onSettle }: SettlementTa
               <Col span={24}>
                 <div
                   style={{
-                    background: 'linear-gradient(135deg, #ff6b35 0%, #ffa552 100%)',
+                    background: '#ff6b35',
                     padding: '24px',
                     borderRadius: '12px',
                     color: 'white',
@@ -186,7 +186,7 @@ const SettlementTab = ({ data, lastSettledAt, settling, onSettle }: SettlementTa
                     loading={settling}
                     onClick={() => setConfirmOpen(true)}
                     style={{
-                      background: 'linear-gradient(135deg, #ff6b35 0%, #ffa552 100%)',
+                      background: '#ff6b35',
                       border: 'none',
                       height: 48,
                       paddingInline: 40,
@@ -285,7 +285,7 @@ const SettlementTab = ({ data, lastSettledAt, settling, onSettle }: SettlementTa
         cancelText="Cancel"
         okButtonProps={{
           style: {
-            background: 'linear-gradient(135deg, #ff6b35 0%, #ffa552 100%)',
+            background: '#ff6b35',
             border: 'none',
           },
           loading: settling,

@@ -59,9 +59,11 @@ const AppSidebar = ({ collapsed, selectedMenu, onMenuSelect }: AppSidebarProps) 
         </div>
 
         <Menu
+          theme='light'
           mode="inline"
           selectedKeys={[selectedMenu]}
           onClick={({ key }) => onMenuSelect(key)}
+          className="sidebar-menu"
           style={{ background: 'transparent', border: 'none' }}
           items={[
             {

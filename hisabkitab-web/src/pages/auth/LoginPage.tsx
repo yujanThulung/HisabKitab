@@ -97,6 +97,10 @@ const Login = () => {
             size="large"
             block
             loading={loading}
+            style={{
+              background: '#ff6b35',
+              borderColor: '#ff6b35',
+            }}
           >
             Login
           </Button>
