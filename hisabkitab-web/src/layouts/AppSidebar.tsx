@@ -3,6 +3,7 @@ import {
   HomeOutlined,
   BarChartOutlined,
   SwapOutlined,
+  HistoryOutlined,
   UserOutlined,
   LogoutOutlined,
 } from '@ant-design/icons';
@@ -79,6 +80,12 @@ const AppSidebar = ({ collapsed, selectedMenu, onMenuSelect }: AppSidebarProps) 
               key: 'settlement',
               icon: <SwapOutlined />,
               label: 'Settlement',
+              style: { color: 'white', fontWeight: 500 },
+            },
+            {
+              key: 'settlement-logs',
+              icon: <HistoryOutlined />,
+              label: 'Settlement Logs',
               style: { color: 'white', fontWeight: 500 },
             },
           ]}

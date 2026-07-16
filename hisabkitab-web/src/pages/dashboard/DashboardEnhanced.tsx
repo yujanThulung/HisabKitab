@@ -7,6 +7,7 @@ import AppHeader from '../../layouts/AppHeader';
 import OverviewTab from './components/OverviewTab';
 import PurchasesTab from './components/PurchasesTab';
 import SettlementTab from './components/SettlementTab';
+import SettlementLogsPage from '../settlement-logs/SettlementLogsPage';
 import ExpenseFormModal from './components/ExpenseFormModal';
 import type { ExpenseFormValues } from './components/ExpenseFormModal';
 import type { Expense } from '../../types/expense';
@@ -74,6 +75,8 @@ const DashboardEnhanced = () => {
             onSettle={handleSettle}
           />
         );
+      case 'settlement-logs':
+        return <SettlementLogsPage />;
       default:
         return <OverviewTab data={data} />;
     }
