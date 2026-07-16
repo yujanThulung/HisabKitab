@@ -5,7 +5,7 @@ import ProtectedRoute from "./ProtectedRoute";
 import AuthLayout from "../layouts/AuthLayout";
 import DashboardLayout from "../layouts/DashboardLayout";
 
-const AppRoutes = () => {
+const AppRoutes = () => { 
   return (
     <Routes>
       <Route element={<PublicRoute />}>

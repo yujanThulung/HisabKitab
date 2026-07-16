@@ -1,131 +1,118 @@
 import { useState, useEffect } from 'react';
-import { 
-  Card, 
-  Table, 
-  Button, 
-  Space, 
-  Modal, 
-  Form, 
-  Input, 
-  Select, 
-  InputNumber, 
-  DatePicker,
-  Tag,
+import {
+  Card,
+  Table,
+  Button,
+  Space,
   Row,
   Col,
-  Statistic
+  Statistic,
+  DatePicker
 } from 'antd';
-import { 
-  PlusOutlined, 
-  EditOutlined, 
+import {
+  PlusOutlined,
+  EditOutlined,
   DeleteOutlined
 } from '@ant-design/icons';
 import dayjs, { Dayjs } from 'dayjs';
 import { expenseApi } from '../../api/expense';
-import { CATEGORIES } from '../../types/expense';
-import type { Expense, CategoryType } from '../../types/expense';
+import type { Expense } from '../../types/expense';
 import { toast } from 'sonner';
+import ExpenseFormModal from '../dashboard/components/ExpenseFormModal';
+import type { ExpenseFormValues } from '../dashboard/components/ExpenseFormModal';
+import { Form } from 'antd';
+import { getErrorMessage } from '../../utils/error';
 
 const { RangePicker } = DatePicker;
 
 const ExpensePage = () => {
   const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [grandTotal, setGrandTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
-  const [filters, setFilters] = useState({
-    type: undefined as 'income' | 'expense' | undefined,
-    category: undefined as string | undefined,
-    dateRange: undefined as [Dayjs, Dayjs] | undefined
-  });
+  const [dateRange, setDateRange] = useState<[Dayjs, Dayjs] | undefined>(undefined);
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 10,
     total: 0
   });
-  const [form] = Form.useForm();
+  const [form] = Form.useForm<ExpenseFormValues>();
 
   const fetchExpenses = async (page = 1) => {
     setLoading(true);
     try {
-      const params: any = {
+      const params: {
+        page: number;
+        limit: number;
+        from?: string;
+        to?: string;
+      } = {
         page,
         limit: pagination.pageSize,
-        ...(filters.type && { type: filters.type }),
-        ...(filters.category && { category: filters.category }),
-        ...(filters.dateRange && {
-          startDate: filters.dateRange[0].toISOString(),
-          endDate: filters.dateRange[1].toISOString()
+        ...(dateRange && {
+          from: dateRange[0].toISOString(),
+          to: dateRange[1].toISOString()
         })
       };
 
       const response = await expenseApi.getExpenses(params);
-      setExpenses(response.data.expenses);
+      setExpenses(response.data.items);
+      setGrandTotal(response.data.summary?.grandTotal ?? 0);
       setPagination({
         ...pagination,
         current: response.data.pagination?.page || 1,
         total: response.data.pagination?.total || 0
       });
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to fetch expenses');
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Failed to fetch expenses'));
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchExpenses();
-  }, [filters]);
+  }, [dateRange]);
 
-  const handleSubmit = async (values: any) => {
+  const handleDelete = async (id: string) => {
     try {
-      const data = {
-        ...values,
-        date: values.date ? dayjs(values.date).toISOString() : undefined
-      };
-
-      if (editingExpense) {
-        await expenseApi.updateExpense(editingExpense._id, data);
-        toast.success('Expense updated successfully');
-      } else {
-        await expenseApi.createExpense(data);
-        toast.success('Expense created successfully');
-      }
-
-      setModalVisible(false);
-      setEditingExpense(null);
-      form.resetFields();
-      fetchExpenses();
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Operation failed');
+      await expenseApi.deleteExpense(id);
+      toast.success('Expense deleted successfully');
+      fetchExpenses(pagination.current);
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Failed to delete'));
     }
   };
 
-  const handleDelete = async (id: string) => {
-    Modal.confirm({
-      title: 'Delete Expense',
-      content: 'Are you sure you want to delete this expense?',
-      okText: 'Delete',
-      okType: 'danger',
-      onOk: async () => {
-        try {
-          await expenseApi.deleteExpense(id);
-          toast.success('Expense deleted successfully');
-          fetchExpenses();
-        } catch (error: any) {
-          toast.error(error.response?.data?.message || 'Failed to delete');
-        }
-      }
-    });
+  const openAddModal = () => {
+    setEditingExpense(null);
+    form.resetFields();
+    form.setFieldsValue({ date: dayjs() });
+    setModalVisible(true);
   };
 
-  const handleEdit = (expense: Expense) => {
+  const openEditModal = (expense: Expense) => {
     setEditingExpense(expense);
     form.setFieldsValue({
-      ...expense,
-      date: dayjs(expense.date)
+      title: expense.title,
+      amount: expense.amount,
+      note: expense.note,
+      date: dayjs(expense.date),
     });
     setModalVisible(true);
+  };
+
+  const closeModal = () => {
+    setModalVisible(false);
+    setEditingExpense(null);
+    form.resetFields();
+  };
+
+  const handleFormSuccess = () => {
+    closeModal();
+    fetchExpenses(pagination.current);
   };
 
   const columns = [
@@ -144,79 +131,42 @@ const ExpensePage = () => {
       ellipsis: true
     },
     {
-      title: 'Category',
-      dataIndex: 'category',
-      key: 'category',
-      render: (category: CategoryType) => {
-        const cat = CATEGORIES[category];
-        return (
-          <Tag color={cat?.color || 'default'}>
-            {cat?.icon} {cat?.label || category}
-          </Tag>
-        );
-      },
-      filters: Object.entries(CATEGORIES).map(([key, value]) => ({
-        text: `${value.icon} ${value.label}`,
-        value: key
-      })),
-      width: 150
-    },
-    {
-      title: 'Type',
-      dataIndex: 'type',
-      key: 'type',
-      render: (type: string) => (
-        <Tag color={type === 'income' ? 'green' : 'red'}>
-          {type === 'income' ? 'Income' : 'Expense'}
-        </Tag>
-      ),
-      filters: [
-        { text: 'Income', value: 'income' },
-        { text: 'Expense', value: 'expense' }
-      ],
-      width: 100
+      title: 'Note',
+      dataIndex: 'note',
+      key: 'note',
+      ellipsis: true,
+      render: (text: string) => text || '-'
     },
     {
       title: 'Amount',
       dataIndex: 'amount',
       key: 'amount',
-      render: (amount: number, record: Expense) => (
-        <span style={{ 
-          color: record.type === 'income' ? '#52c41a' : '#ff4d4f', 
-          fontWeight: 600,
-          fontSize: '15px'
-        }}>
-          {record.type === 'income' ? '+' : '-'}₹{amount.toLocaleString()}
+      render: (amount: number) => (
+        <span style={{ fontWeight: 600, fontSize: '15px' }}>
+          ₹{amount.toLocaleString()}
         </span>
       ),
       sorter: true,
       width: 120
     },
     {
-      title: 'Description',
-      dataIndex: 'description',
-      key: 'description',
-      ellipsis: true,
-      render: (text: string) => text || '-'
-    },
-    {
       title: 'Actions',
       key: 'actions',
       fixed: 'right' as const,
       width: 100,
-      render: (_: any, record: Expense) => (
+      render: (_: unknown, record: Expense) => (
         <Space>
-          <Button 
-            type="text" 
+          <Button
+            type="text"
             size="small"
-            icon={<EditOutlined />} 
-            onClick={() => handleEdit(record)}
+            icon={<EditOutlined />}
+            onClick={() => openEditModal(record)}
           />
-          <Button 
-            type="text" 
+          <Button
+            type="text"
             size="small"
-            danger 
-            icon={<DeleteOutlined />} 
+            danger
+            icon={<DeleteOutlined />}
             onClick={() => handleDelete(record._id)}
           />
         </Space>
@@ -224,28 +174,15 @@ const ExpensePage = () => {
     }
   ];
 
-  // Calculate quick stats
-  const totalIncome = expenses
-    .filter(e => e.type === 'income')
-    .reduce((sum, e) => sum + e.amount, 0);
-  
-  const totalExpense = expenses
-    .filter(e => e.type === 'expense')
-    .reduce((sum, e) => sum + e.amount, 0);
-
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-800">Transactions</h1>
-        <Button 
-          type="primary" 
+        <Button
+          type="primary"
           icon={<PlusOutlined />}
           size="large"
-          onClick={() => {
-            setEditingExpense(null);
-            form.resetFields();
-            setModalVisible(true);
-          }}
+          onClick={openAddModal}
         >
           Add Transaction
         </Button>
@@ -253,36 +190,23 @@ const ExpensePage = () => {
 
       {/* Quick Stats */}
       <Row gutter={16} className="mb-6">
-        <Col xs={24} sm={8}>
+        <Col xs={24} sm={12}>
           <Card>
             <Statistic
-              title="Total Income"
-              value={totalIncome}
+              title="Total Spent"
+              value={grandTotal}
               precision={2}
               prefix="₹"
-              valueStyle={{ color: '#52c41a' }}
+              valueStyle={{ color: '#ff6b35' }}
             />
           </Card>
         </Col>
-        <Col xs={24} sm={8}>
+        <Col xs={24} sm={12}>
           <Card>
             <Statistic
-              title="Total Expense"
-              value={totalExpense}
-              precision={2}
-              prefix="₹"
-              valueStyle={{ color: '#ff4d4f' }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={8}>
-          <Card>
-            <Statistic
-              title="Net Balance"
-              value={totalIncome - totalExpense}
-              precision={2}
-              prefix="₹"
-              valueStyle={{ color: totalIncome - totalExpense >= 0 ? '#52c41a' : '#ff4d4f' }}
+              title="Transactions"
+              value={pagination.total}
+              valueStyle={{ color: '#1890ff' }}
             />
           </Card>
         </Col>
@@ -291,38 +215,11 @@ const ExpensePage = () => {
       {/* Filters */}
       <Card className="mb-4">
         <Row gutter={16} align="middle">
-          <Col xs={24} sm={8}>
-            <Select
-              placeholder="Filter by Type"
-              allowClear
-              style={{ width: '100%' }}
-              value={filters.type}
-              onChange={(value) => setFilters({ ...filters, type: value })}
-            >
-              <Select.Option value="income">Income</Select.Option>
-              <Select.Option value="expense">Expense</Select.Option>
-            </Select>
-          </Col>
-          <Col xs={24} sm={8}>
-            <Select
-              placeholder="Filter by Category"
-              allowClear
-              style={{ width: '100%' }}
-              value={filters.category}
-              onChange={(value) => setFilters({ ...filters, category: value })}
-            >
-              {Object.entries(CATEGORIES).map(([key, value]) => (
-                <Select.Option key={key} value={key}>
-                  {value.icon} {value.label}
-                </Select.Option>
-              ))}
-            </Select>
-          </Col>
-          <Col xs={24} sm={8}>
+          <Col xs={24} sm={12}>
             <RangePicker
               style={{ width: '100%' }}
-              value={filters.dateRange}
-              onChange={(dates) => setFilters({ ...filters, dateRange: dates as [Dayjs, Dayjs] | undefined })}
+              value={dateRange}
+              onChange={(dates) => setDateRange(dates as [Dayjs, Dayjs] | undefined)}
             />
           </Col>
         </Row>
@@ -341,121 +238,17 @@ const ExpensePage = () => {
             showTotal: (total) => `Total ${total} transactions`,
             onChange: (page) => fetchExpenses(page)
           }}
-          scroll={{ x: 1000 }}
+          scroll={{ x: 800 }}
         />
       </Card>
 
-      {/* Add/Edit Modal */}
-      <Modal
-        title={editingExpense ? 'Edit Transaction' : 'Add Transaction'}
+      <ExpenseFormModal
         open={modalVisible}
-        onCancel={() => {
-          setModalVisible(false);
-          setEditingExpense(null);
-          form.resetFields();
-        }}
-        footer={null}
-        width={600}
-      >
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleSubmit}
-          initialValues={{
-            type: 'expense',
-            category: 'other',
-            date: dayjs()
-          }}
-        >
-          <Form.Item
-            label="Title"
-            name="title"
-            rules={[{ required: true, message: 'Please enter title' }]}
-          >
-            <Input placeholder="e.g., Grocery Shopping" size="large" />
-          </Form.Item>
-
-          <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item
-                label="Type"
-                name="type"
-                rules={[{ required: true, message: 'Please select type' }]}
-              >
-                <Select size="large">
-                  <Select.Option value="income">💰 Income</Select.Option>
-                  <Select.Option value="expense">💸 Expense</Select.Option>
-                </Select>
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
-                label="Amount"
-                name="amount"
-                rules={[{ required: true, message: 'Please enter amount' }]}
-              >
-                <InputNumber
-                  prefix="₹"
-                  size="large"
-                  style={{ width: '100%' }}
-                  min={0}
-                  placeholder="0.00"
-                />
-              </Form.Item>
-            </Col>
-          </Row>
-
-          <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item
-                label="Category"
-                name="category"
-                rules={[{ required: true, message: 'Please select category' }]}
-              >
-                <Select placeholder="Select category" size="large">
-                  {Object.entries(CATEGORIES).map(([key, value]) => (
-                    <Select.Option key={key} value={key}>
-                      {value.icon} {value.label}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
-                label="Date"
-                name="date"
-                rules={[{ required: true, message: 'Please select date' }]}
-              >
-                <DatePicker 
-                  style={{ width: '100%' }} 
-                  format="MMM DD, YYYY" 
-                  size="large"
-                />
-              </Form.Item>
-            </Col>
-          </Row>
-
-          <Form.Item label="Description" name="description">
-            <Input.TextArea 
-              rows={3} 
-              placeholder="Optional description or notes" 
-              size="large"
-            />
-          </Form.Item>
-
-          <Form.Item className="mb-0 text-right">
-            <Space>
-              <Button size="large" onClick={() => setModalVisible(false)}>
-                Cancel
-              </Button>
-              <Button type="primary" size="large" htmlType="submit">
-                {editingExpense ? 'Update Transaction' : 'Create Transaction'}
-              </Button>
-            </Space>
-          </Form.Item>
-        </Form>
-      </Modal>
+        editingExpense={editingExpense}
+        form={form}
+        onSuccess={handleFormSuccess}
+        onClose={closeModal}
+      />
     </div>
   );
 };

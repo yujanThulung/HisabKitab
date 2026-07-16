@@ -48,7 +48,7 @@ export const useAuthStore = create<AuthState>()(
                 try {
                     await logoutApi();
                 } catch (error) {
-
+                    console.error('Logout failed:', error);
                 }
                 set({
                     user: null,
@@ -86,7 +86,7 @@ export const useAuthStore = create<AuthState>()(
         }),
         {
             name: "auth-storage",
-            partialize: (state: any) => ({
+            partialize: (state: AuthState) => ({
                 user: state.user,
                 accessToken: state.accessToken,
                 refreshToken: state.refreshToken,

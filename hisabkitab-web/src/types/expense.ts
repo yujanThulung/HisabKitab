@@ -1,72 +1,60 @@
+// Single expense item from the backend
+export interface ExpenseUser {
+  _id: string;
+  name: string;
+  phone: string;
+}
+
 export interface Expense {
   _id: string;
-  userId: string;
-  userName: string;
   title: string;
   amount: number;
-  category: string;
-  type: 'income' | 'expense';
-  description?: string;
+  image?: string;
+  imagePublicId?: string | null;
+  note?: string;
   date: string;
+  userId: ExpenseUser;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface ExpenseStats {
-  summary: {
-    totalIncome: number;
-    totalExpense: number;
-    balance: number;
-    transactionCount: number;
+// data.summary.userTotals entry from GET /expense
+export interface UserTotal {
+  userId: string;
+  name: string;
+  phone: string;
+  totalAmount: number;
+}
+
+// data.summary from GET /expense
+export interface ExpenseSummary {
+  grandTotal: number;
+  userTotals: UserTotal[];
+}
+
+// Full data shape from GET /expense
+export interface ExpenseListResponse {
+  items: Expense[];
+  summary: ExpenseSummary;
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    hasMore: boolean;
   };
-  categoryBreakdown: Array<{
-    category: string;
-    type: 'income' | 'expense';
-    total: number;
-    count: number;
-  }>;
-  monthlyTrend: Array<{
-    _id: {
-      year: number;
-      month: number;
-      type: 'income' | 'expense';
-    };
-    total: number;
-    count: number;
-  }>;
-  recentTransactions: Expense[];
-  userSpending: Array<{
-    userId: string;
-    userName: string;
-    totalSpent: number;
-    transactionCount: number;
-  }>;
 }
 
 export interface CreateExpenseDto {
   title: string;
   amount: number;
-  category?: string;
-  type?: 'income' | 'expense';
-  description?: string;
   note?: string;
   date?: string;
-  image?: string;
+  image?: File;   // actual File for upload; string URL when editing
 }
 
 export interface UpdateExpenseDto {
   title?: string;
   amount?: number;
-  category?: string;
-  type?: 'income' | 'expense';
-  description?: string;
+  note?: string;
   date?: string;
 }
-
-export type CategoryType = 'food' | 'rent' | 'other';
-
-export const CATEGORIES: Record<CategoryType, { label: string; color: string; icon: string }> = {
-  food: { label: 'Food', color: '#ff6b6b', icon: '🍔' },
-  rent: { label: 'Rent', color: '#4ecdc4', icon: '🏠' },
-  other: { label: 'Other', color: '#636e72', icon: '�' }
-};

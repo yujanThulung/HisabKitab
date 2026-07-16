@@ -3,7 +3,6 @@ import type { ReactNode } from "react";
 import Login from "../pages/auth/LoginPage";
 // import Register from "../pages/auth/Register";
 import DashboardEnhanced from "../pages/dashboard/DashboardEnhanced";
-import DashboardTest from "../pages/dashboard/DashboardTest";
 import ExpensePage from "../pages/daily-items/ExpensePage";
 
 export const PATHS = {
@@ -12,7 +11,6 @@ export const PATHS = {
   REGISTER: "/register",
   DASHBOARD: "/dashboard",
   EXPENSES: "/expenses",
-  TEST: "/test",
 } as const;
 
 export interface AppRoute {
@@ -32,10 +30,6 @@ export const publicRoutes: AppRoute[] = [
 ];
 
 export const protectedRoutes: AppRoute[] = [
-  {
-    path: PATHS.TEST,
-    element: <DashboardTest />,
-  },
   {
     path: PATHS.DASHBOARD,
     element: <DashboardEnhanced />,
