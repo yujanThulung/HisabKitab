@@ -1,17 +1,17 @@
-import { Layout, Space, Button, DatePicker } from 'antd';
-import { MenuFoldOutlined, MenuUnfoldOutlined, ReloadOutlined, PlusOutlined } from '@ant-design/icons';
+import { Layout, Space, Button, DatePicker, Tag, Tooltip } from 'antd';
+import { MenuFoldOutlined, MenuUnfoldOutlined, ReloadOutlined, PlusOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import type { Dayjs } from 'dayjs';
 
 const { Header } = Layout;
 const { RangePicker } = DatePicker;
 
-// Must match Ant Design Sider default widths
 const SIDER_WIDTH = 200;
 const SIDER_COLLAPSED_WIDTH = 80;
 
 interface AppHeaderProps {
   collapsed: boolean;
   dateRange: [Dayjs, Dayjs];
+  lastSettledAt: Dayjs | null;
   onToggleSidebar: () => void;
   onDateRangeChange: (range: [Dayjs, Dayjs]) => void;
   onRefresh: () => void;
@@ -21,6 +21,7 @@ interface AppHeaderProps {
 const AppHeader = ({
   collapsed,
   dateRange,
+  lastSettledAt,
   onToggleSidebar,
   onDateRangeChange,
   onRefresh,
@@ -36,17 +37,16 @@ const AppHeader = ({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        // Fixed at top, offset by sidebar width so it sits flush against it
         position: 'fixed',
         top: 0,
         left: siderWidth,
         right: 0,
         zIndex: 99,
-        // Smooth slide when sidebar collapses/expands
         transition: 'left 0.2s',
         boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
       }}
     >
+      {/* Left: toggle + title + last settled badge */}
       <Space>
         <Button
           type="text"
@@ -57,8 +57,20 @@ const AppHeader = ({
         <h2 style={{ margin: 0, color: '#ff6b35', fontWeight: 700 }}>
           Roommate Purchase Tracker
         </h2>
+        {lastSettledAt && (
+          <Tooltip title={`Expenses shown from ${lastSettledAt.format('MMM DD, YYYY')} onwards`}>
+            <Tag
+              icon={<CheckCircleOutlined />}
+              color="success"
+              style={{ cursor: 'default', fontSize: 12 }}
+            >
+              Settled {lastSettledAt.format('MMM DD, YYYY')}
+            </Tag>
+          </Tooltip>
+        )}
       </Space>
 
+      {/* Right: date range + actions */}
       <Space>
         <RangePicker
           value={dateRange}

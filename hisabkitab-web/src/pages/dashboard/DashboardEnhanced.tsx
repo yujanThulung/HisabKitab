@@ -14,7 +14,7 @@ import type { Expense } from '../../types/expense';
 const { Content } = Layout;
 
 const DashboardEnhanced = () => {
-  const { data, loading, dateRange, setDateRange, fetchData } = useDashboard();
+  const { data, loading, settling, lastSettledAt, dateRange, setDateRange, fetchData, handleSettle } = useDashboard();
 
   const [collapsed, setCollapsed] = useState(false);
   const [selectedMenu, setSelectedMenu] = useState('overview');
@@ -66,7 +66,14 @@ const DashboardEnhanced = () => {
       case 'purchases':
         return <PurchasesTab expenses={data.items} onEdit={openEditModal} />;
       case 'settlement':
-        return <SettlementTab data={data} />;
+        return (
+          <SettlementTab
+            data={data}
+            lastSettledAt={lastSettledAt}
+            settling={settling}
+            onSettle={handleSettle}
+          />
+        );
       default:
         return <OverviewTab data={data} />;
     }
@@ -84,6 +91,7 @@ const DashboardEnhanced = () => {
         <AppHeader
           collapsed={collapsed}
           dateRange={dateRange}
+          lastSettledAt={lastSettledAt}
           onToggleSidebar={() => setCollapsed(prev => !prev)}
           onDateRangeChange={setDateRange}
           onRefresh={fetchData}
