@@ -12,7 +12,7 @@ import {
 import {
   PlusOutlined,
   EditOutlined,
-  DeleteOutlined
+  // DeleteOutlined
 } from '@ant-design/icons';
 import dayjs, { Dayjs } from 'dayjs';
 import { expenseApi } from '../../api/expense';
@@ -76,15 +76,15 @@ const ExpensePage = () => {
     fetchExpenses();
   }, [dateRange]);
 
-  const handleDelete = async (id: string) => {
-    try {
-      await expenseApi.deleteExpense(id);
-      toast.success('Expense deleted successfully');
-      fetchExpenses(pagination.current);
-    } catch (error) {
-      toast.error(getErrorMessage(error, 'Failed to delete'));
-    }
-  };
+  // const handleDelete = async (id: string) => {
+  //   try {
+  //     await expenseApi.deleteExpense(id);
+  //     toast.success('Expense deleted successfully');
+  //     fetchExpenses(pagination.current);
+  //   } catch (error) {
+  //     toast.error(getErrorMessage(error, 'Failed to delete'));
+  //   }
+  // };
 
   const openAddModal = () => {
     setEditingExpense(null);
@@ -162,13 +162,13 @@ const ExpensePage = () => {
             icon={<EditOutlined />}
             onClick={() => openEditModal(record)}
           />
-          <Button
+          {/* <Button
             type="text"
             size="small"
             danger
             icon={<DeleteOutlined />}
             onClick={() => handleDelete(record._id)}
-          />
+          /> */}
         </Space>
       )
     }
