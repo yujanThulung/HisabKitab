@@ -206,7 +206,7 @@ export const me = async (req: Request, res: Response) => {
 
 export const getAllUsers = async (req: Request, res: Response) => {
     try {
-        const users = await User.find().select('-password -refreshToken');
+        const users = await User.find().select('-password -refreshToken').sort({ createdAt: -1 });
         sendSuccess({ res, statusCode: 201, message: "Users fetch sucessfully.", data: users })
     } catch (error) {
         console.error("Get me error:", error);
