@@ -7,6 +7,7 @@ import { errorHandler } from "./middleware/errorHandler";
 
 import authRoute from "./routes/auth.route";
 import expanseRoute from "./routes/expanse.route";
+import settlementRoute from "./routes/settlement.route"
 
 
 dotenv.config();
@@ -40,6 +41,7 @@ app.get("/health", (_req, res) => {
 
 app.use("/api", authRoute);
 app.use("/api", expanseRoute);
+app.use("/api", settlementRoute);
 
 // Backward compat: /api/login -> /api/auth/login
 app.all("/api/login", (req, res) => {
