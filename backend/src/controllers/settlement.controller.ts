@@ -1,11 +1,17 @@
 import { Request, Response } from "express";
 import Expense from "../models/Expenses";
+import User from "../models/User";
 import mongoose from "mongoose";
 import { sendError, sendSuccess } from "../utils/response";
 import Settlement, { ITransaction, IUserSnapshot } from "../models/SettlementSchema";
 
 
 interface PopulatedUser {
+    _id: mongoose.Types.ObjectId;
+    name: string;
+}
+
+interface AllUser {
     _id: mongoose.Types.ObjectId;
     name: string;
 }
@@ -19,8 +25,9 @@ interface UserTotal {
 /**
  * Shared computation logic used by both createSettlement and getSettlementPreview.
  * Groups expenses by user, computes balances, and resolves debts via greedy matching.
+ * Includes ALL users in the system, not just those who made purchases.
  */
-function computeSettlement(expenses: Array<{ userId: PopulatedUser; amount: number }>) {
+function computeSettlement(expenses: Array<{ userId: PopulatedUser; amount: number }>, allUsers: AllUser[]) {
     const totalMap: Record<string, UserTotal> = {};
 
     for (const exp of expenses) {
@@ -30,6 +37,14 @@ function computeSettlement(expenses: Array<{ userId: PopulatedUser; amount: numb
         }
         totalMap[uid].totalAmount += exp.amount;
     }
+
+    for (const user of allUsers) {
+        const uid = user._id.toString();
+        if (!totalMap[uid]) {
+            totalMap[uid] = { userId: user._id, name: user.name, totalAmount: 0 };
+        }
+    }
+
     const userTotals: UserTotal[] = Object.values(totalMap);
 
     const totalAmount = userTotals.reduce((sum, u) => sum + u.totalAmount, 0);
@@ -96,7 +111,8 @@ export const createSettlement = async (req: Request, res: Response) => {
             return sendError({ res, statusCode: 400, message: "No expenses found" });
         }
 
-        const { totalAmount, perPersonShare, transactions, userSnapshot } = computeSettlement(expenses);
+        const allUsers = await User.find({}, "name").lean() as AllUser[];
+        const { totalAmount, perPersonShare, transactions, userSnapshot } = computeSettlement(expenses, allUsers);
 
         const settlement = await Settlement.create({
             settledAt: new Date(),
@@ -146,7 +162,8 @@ export const getSettlementPreview = async (req: Request, res: Response) => {
             return sendSuccess({ res, statusCode: 200, message: "No expenses found for preview", data: null });
         }
 
-        const { totalAmount, perPersonShare, transactions, userSnapshot } = computeSettlement(expenses);
+        const allUsers = await User.find({}, "name").lean() as AllUser[];
+        const { totalAmount, perPersonShare, transactions, userSnapshot } = computeSettlement(expenses, allUsers);
 
         const periodFrom = expenses[0].date;
         const periodTo = expenses[expenses.length - 1].date;
