@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import dayjs, { Dayjs } from 'dayjs';
 import { toast } from 'sonner';
 import { expenseApi } from '../../../api/expense';
-import { settlementApi, type CreateSettlementDto } from '../../../api/settlement';
 import type { Expense, ExpenseSummary } from '../../../types/expense';
 
 export interface UserBreakdown {
@@ -53,48 +52,16 @@ function deriveData(items: Expense[] = [], summary?: ExpenseSummary): DashboardD
 
   userBreakdown.sort((a, b) => b.balance - a.balance);
 
-  return {
-    items,
-    grandTotal,
-    perPersonShare,
-    userBreakdown,
-    totalTransactions: items.length,
-  };
+  return { items, grandTotal, perPersonShare, userBreakdown, totalTransactions: items.length };
 }
 
 export function useDashboard() {
   const [data, setData] = useState<DashboardData>(DEFAULT_DATA);
   const [loading, setLoading] = useState(false);
-  const [settling, setSettling] = useState(false);
-
-  // lastSettledAt drives the start of the current cycle.
-  // On mount we fetch the latest settlement to restore this across page refreshes.
-  const [lastSettledAt, setLastSettledAt] = useState<Dayjs | null>(null);
   const [dateRange, setDateRange] = useState<[Dayjs, Dayjs]>([
     dayjs().startOf('month'),
     dayjs().endOf('month'),
   ]);
-
-  // On mount: fetch the latest settlement and shift the date range start to
-  // the day after settlement so the dashboard always shows the current cycle.
-  useEffect(() => {
-    const initFromLatestSettlement = async () => {
-      try {
-        const res = await settlementApi.getLatestSettlement();
-        if (res.data?.settledAt) {
-          const settledDay = dayjs(res.data.settledAt);
-          setLastSettledAt(settledDay);
-          // Use exact settlement timestamp so pre-settlement expenses on the same
-          // day are excluded from the current cycle.
-          setDateRange([settledDay, dayjs().endOf('month')]);
-        }
-      } catch {
-        // No settlement yet — default range is fine, swallow the error silently
-      }
-    };
-
-    initFromLatestSettlement();
-  }, []);
 
   const fetchData = async () => {
     setLoading(true);
@@ -121,95 +88,5 @@ export function useDashboard() {
     fetchData();
   }, [dateRange]);
 
-  /**
-   * handleSettle — called when the user confirms "Settle All".
-   *
-   * 1. Builds the full CreateSettlementDto from current data + dateRange
-   * 2. POSTs to /settlement/create
-   * 3. On success: updates lastSettledAt, shifts dateRange to new cycle
-   *
-   * The transactions array is computed here (same greedy algorithm as SettlementTab)
-   * so the backend receives the exact resolved pay-graph.
-   */
-  const handleSettle = async (): Promise<boolean> => {
-    const { userBreakdown } = data;
-
-    // Build transactions list (greedy balance resolution)
-    const creditors = userBreakdown
-      .filter(b => b.balance > 1e-9)
-      .map(b => ({ ...b, remaining: b.balance }));
-    const debtors = userBreakdown
-      .filter(b => b.balance < -1e-9)
-      .map(b => ({ ...b, remaining: -b.balance }));
-
-    const transactions: CreateSettlementDto['transactions'] = [];
-    let i = 0;
-    let j = 0;
-    while (i < creditors.length && j < debtors.length) {
-      const pay = Math.min(creditors[i].remaining, debtors[j].remaining);
-      transactions.push({
-        fromId: debtors[j].userId,
-        fromName: debtors[j].name,
-        toId: creditors[i].userId,
-        toName: creditors[i].name,
-        amount: pay,
-      });
-      creditors[i].remaining -= pay;
-      debtors[j].remaining -= pay;
-      if (creditors[i].remaining < 1e-9) i++;
-      if (debtors[j].remaining < 1e-9) j++;
-    }
-
-    // Payload for the settlement API call (backend not yet ready)
-    // const payload: CreateSettlementDto = {
-    //   periodFrom: dateRange[0].toISOString(),
-    //   periodTo: dayjs().toISOString(),
-    //   transactions,
-    //   userSnapshot: userBreakdown.map(u => ({
-    //     userId: u.userId,
-    //     name: u.name,
-    //     totalAmount: u.totalAmount,
-    //     balance: u.balance,
-    //   })),
-    //   totalAmount: grandTotal,
-    //   perPersonShare,
-    // };
-
-    setSettling(true);
-    try {
-      // TODO: uncomment when backend is ready
-      // const res = await settlementApi.createSettlement(payload);
-      // const settledDay = dayjs(res.data.settledAt);
-
-      // Simulated response until backend is ready
-      await new Promise(resolve => setTimeout(resolve, 800));
-      const settledDay = dayjs();
-
-      setLastSettledAt(settledDay);
-      // Reset data immediately so the owed list clears right away
-      setData(DEFAULT_DATA);
-      // New cycle starts from the exact settlement timestamp — not startOf('day',
-      // so existing today's expenses are excluded from the new cycle fetch.
-      setDateRange([settledDay, dayjs().endOf('month')]);
-
-      toast.success('All settled! New cycle starts from now.');
-      return true;
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Settlement failed. Please try again.');
-      return false;
-    } finally {
-      setSettling(false);
-    }
-  };
-
-  return {
-    data,
-    loading,
-    settling,
-    lastSettledAt,
-    dateRange,
-    setDateRange,
-    fetchData,
-    handleSettle,
-  };
+  return { data, loading, dateRange, setDateRange, fetchData };
 }

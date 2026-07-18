@@ -10,11 +10,8 @@ export function useSettlementLogs() {
     setLoading(true);
     try {
       const res = await settlementApi.getSettlements();
-      // Sort newest first
-      const sorted = (res.data ?? []).sort(
-        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
-      setLogs(sorted);
+      // Backend returns newest first — no client-side sort needed
+      setLogs(res.data ?? []);
     } catch (error: any) {
       if (error.response?.status !== 404) {
         toast.error(error.response?.data?.message || 'Failed to fetch settlement logs');
