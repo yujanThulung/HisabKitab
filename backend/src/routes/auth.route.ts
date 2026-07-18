@@ -10,7 +10,7 @@ const router = Router();
 
 router.post("/auth/register",validate(registerSchema), register);
 router.post("/auth/login", validate(loginSchema), login);
-router.post("/auth/logout",authenticate, logout);
+router.post("/auth/logout", logout);
 router.get("/auth/refresh-token", refresh);
 router.get("/auth/me", authenticate, me)
 router.get("/auth/users",authenticate,getAllUsers);
