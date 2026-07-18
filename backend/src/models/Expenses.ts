@@ -8,6 +8,7 @@ export interface IExpense extends Document {
     note?: string;
     date: Date;
     userId: mongoose.Types.ObjectId;
+    isSettled: boolean;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -25,12 +26,13 @@ const ExpenseSchema = new Schema<IExpense>({
             }
         }
     },
-    userId: { type: mongoose.Types.ObjectId, ref: "User", required: true }
+    userId: { type: mongoose.Types.ObjectId, ref: "User", required: true },
+    isSettled: { type: Boolean, default: false }
 }, {
     timestamps: true
 })
 
-ExpenseSchema.index({ userId: 1, title: 1, date: 1, }, { unique: true, });
+ExpenseSchema.index({ isSettled: 1 });
 const Expense = mongoose.model<IExpense>("Expense", ExpenseSchema);
 
 export default Expense;
