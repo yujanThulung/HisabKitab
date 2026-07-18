@@ -1,1 +1,28 @@
 @import "tailwindcss";
+
+/* Sidebar menu — selected item: white background with orange text */
+.sidebar-menu.ant-menu-light .ant-menu-item-selected {
+  background-color: rgba(255, 255, 255, 0.25) !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  border-radius: 8px;
+}
+
+.sidebar-menu.ant-menu-light .ant-menu-item-selected .anticon {
+  color: #ffffff !important;
+}
+
+/* Sidebar menu — hover */
+.sidebar-menu.ant-menu-light .ant-menu-item:hover {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  color: #ffffff !important;
+}
+
+.sidebar-menu.ant-menu-light .ant-menu-item:hover .anticon {
+  color: #ffffff !important;
+}
+
+/* Remove the default blue/orange left-border indicator on selected item */
+.sidebar-menu.ant-menu-light .ant-menu-item-selected::after {
+  border-right: none !important;
+}

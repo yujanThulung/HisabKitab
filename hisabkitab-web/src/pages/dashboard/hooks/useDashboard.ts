@@ -35,7 +35,6 @@ function deriveData(items: Expense[] = [], summary?: ExpenseSummary): DashboardD
   const userCount = userTotals.length;
   const perPersonShare = userCount > 0 ? grandTotal / userCount : 0;
 
-  // Count transactions per user from items
   const txCountMap = new Map<string, number>();
   items.forEach(item => {
     const uid = item.userId?._id;
@@ -53,13 +52,7 @@ function deriveData(items: Expense[] = [], summary?: ExpenseSummary): DashboardD
 
   userBreakdown.sort((a, b) => b.balance - a.balance);
 
-  return {
-    items,
-    grandTotal,
-    perPersonShare,
-    userBreakdown,
-    totalTransactions: items.length,
-  };
+  return { items, grandTotal, perPersonShare, userBreakdown, totalTransactions: items.length };
 }
 
 export function useDashboard() {
@@ -78,7 +71,6 @@ export function useDashboard() {
         to: dateRange[1].toISOString(),
         limit: 100,
       });
-
       setData(deriveData(res.data?.items, res.data?.summary));
     } catch (error: any) {
       setData(DEFAULT_DATA);

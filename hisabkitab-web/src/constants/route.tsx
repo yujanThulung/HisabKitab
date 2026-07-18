@@ -11,6 +11,7 @@ export const PATHS = {
   REGISTER: "/register",
   DASHBOARD: "/dashboard",
   EXPENSES: "/expenses",
+  
 } as const;
 
 export interface AppRoute {

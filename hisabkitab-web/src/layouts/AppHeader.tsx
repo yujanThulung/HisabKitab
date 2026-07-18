@@ -5,7 +5,6 @@ import type { Dayjs } from 'dayjs';
 const { Header } = Layout;
 const { RangePicker } = DatePicker;
 
-// Must match Ant Design Sider default widths
 const SIDER_WIDTH = 200;
 const SIDER_COLLAPSED_WIDTH = 80;
 
@@ -36,17 +35,16 @@ const AppHeader = ({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        // Fixed at top, offset by sidebar width so it sits flush against it
         position: 'fixed',
         top: 0,
         left: siderWidth,
         right: 0,
         zIndex: 99,
-        // Smooth slide when sidebar collapses/expands
         transition: 'left 0.2s',
         boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
       }}
     >
+      {/* Left: toggle + title */}
       <Space>
         <Button
           type="text"
@@ -59,6 +57,7 @@ const AppHeader = ({
         </h2>
       </Space>
 
+      {/* Right: date range + actions */}
       <Space>
         <RangePicker
           value={dateRange}
@@ -73,7 +72,7 @@ const AppHeader = ({
           icon={<PlusOutlined />}
           onClick={onAddPurchase}
           style={{
-            background: 'linear-gradient(135deg, #ff6b35 0%, #ffa552 100%)',
+            background: '#ff6b35',
             border: 'none',
             boxShadow: '0 4px 12px rgba(255, 107, 53, 0.3)',
           }}
