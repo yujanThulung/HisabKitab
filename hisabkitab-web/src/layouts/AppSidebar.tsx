@@ -90,6 +90,12 @@ const AppSidebar = ({ collapsed, selectedMenu, onMenuSelect }: AppSidebarProps) 
               label: 'Settlement Logs',
               style: { color: 'white', fontWeight: 500 },
             },
+            {
+              key: 'members',
+              icon: <UserOutlined />,
+              label: 'Members',
+              style: { color: 'white', fontWeight: 500 },
+            },
           ]}
         />
 

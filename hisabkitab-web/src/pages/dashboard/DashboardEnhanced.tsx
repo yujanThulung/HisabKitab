@@ -8,6 +8,7 @@ import OverviewTab from './components/OverviewTab';
 import PurchasesTab from './components/PurchasesTab';
 import SettlementTab from './components/SettlementTab';
 import SettlementLogsPage from '../settlement-logs/SettlementLogsPage';
+import UsersPage from '../users/UsersPage';
 import ExpenseFormModal from './components/ExpenseFormModal';
 import type { ExpenseFormValues } from './components/ExpenseFormModal';
 import type { Expense } from '../../types/expense';
@@ -18,7 +19,14 @@ const DashboardEnhanced = () => {
   const { data, loading, dateRange, setDateRange, fetchData } = useDashboard();
 
   const [collapsed, setCollapsed] = useState(false);
-  const [selectedMenu, setSelectedMenu] = useState('overview');
+  const [selectedMenu, setSelectedMenu] = useState(
+    () => localStorage.getItem('activeTab') ?? 'overview'
+  );
+
+  const handleMenuSelect = (key: string) => {
+    localStorage.setItem('activeTab', key);
+    setSelectedMenu(key);
+  };
   const [modalVisible, setModalVisible] = useState(false);
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [form] = Form.useForm<ExpenseFormValues>();
@@ -70,6 +78,8 @@ const DashboardEnhanced = () => {
         return <SettlementTab />;
       case 'settlement-logs':
         return <SettlementLogsPage />;
+      case 'members':
+        return <UsersPage />;
       default:
         return <OverviewTab data={data} />;
     }
@@ -80,7 +90,7 @@ const DashboardEnhanced = () => {
       <AppSidebar
         collapsed={collapsed}
         selectedMenu={selectedMenu}
-        onMenuSelect={setSelectedMenu}
+        onMenuSelect={handleMenuSelect}
       />
 
       <Layout>

@@ -1,5 +1,6 @@
 import api from "./axios";
 import axios from "axios";
+import { useAuthStore } from "../store/authStore";
 
 import type {
     LoginPayload,
@@ -24,12 +25,25 @@ export const login = async (
 
 
 export const register = async (payload: RegisterPayload) => {
-    const response = await api.post("/register", payload);
+    const response = await api.post("/auth/register", payload);
     return response.data;
 }
 
-export const logout = async () => {
-    await api.post("/auth/logout")
+// Uses plain axios (no interceptors) to avoid a loop where a 401 response
+// triggers a refresh attempt, which fails, which calls logout again.
+// Access token is attached manually since the interceptor is bypassed.
+export const logout = async (refreshToken?: string | null) => {
+    const accessToken = useAuthStore.getState().accessToken;
+    await axios.post(
+        `${import.meta.env.VITE_API_URL}/auth/logout`,
+        { refreshToken },
+        {
+            headers: {
+                "Content-Type": "application/json",
+                ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+            },
+        }
+    );
 }
 
 // Uses a plain axios instance (no interceptors) to avoid an infinite refresh loop.

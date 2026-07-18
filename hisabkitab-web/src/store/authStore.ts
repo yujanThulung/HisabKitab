@@ -40,17 +40,22 @@ export const useAuthStore = create<AuthState>()(
       },
 
       logout: async () => {
-        try {
-          await logoutApi(); // best-effort — invalidates refresh token on server
-        } catch (error) {
-          console.error("Logout failed:", error);
-        }
-        // Clear everything from store + localStorage (zustand persist handles this)
+        // Grab the refresh token before clearing state — needed to invalidate on server
+        const currentRefreshToken = get().refreshToken;
+
+        // Clear local state FIRST — this stops any retry loops immediately.
+        // ProtectedRoute will redirect to /login as soon as tokens are null.
         set({
           user: null,
           accessToken: null,
           refreshToken: null,
           loading: false,
+        });
+
+        // Fire-and-forget — invalidate the refresh token on the server.
+        // Uses plain axios (no interceptors) so a 401 here can't trigger another logout.
+        logoutApi(currentRefreshToken).catch(() => {
+          // Server invalidation failed — local state is already cleared, nothing to do
         });
       },
 

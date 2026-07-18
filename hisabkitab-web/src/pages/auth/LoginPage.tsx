@@ -1,6 +1,7 @@
 import { Button, Card, Form, Input, Typography, message } from "antd";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import { PATHS } from "../../constants/route";
@@ -16,6 +17,15 @@ const Login = () => {
 
   const login = useAuthStore((state) => state.login);
   const loading = useAuthStore((state) => state.loading);
+  const accessToken = useAuthStore((state) => state.accessToken);
+
+  // Redirect as soon as accessToken lands in the store — works whether the
+  // user just logged in or arrives at /login with a valid existing token.
+  useEffect(() => {
+    if (accessToken) {
+      navigate(PATHS.DASHBOARD, { replace: true });
+    }
+  }, [accessToken, navigate]);
 
   const { control, handleSubmit } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -35,9 +45,8 @@ const Login = () => {
       };
 
       await login(payload);
-
       message.success("Login successful");
-      navigate(PATHS.DASHBOARD);
+      // navigate is handled by the useEffect above once accessToken is set
     } catch (error) {
       message.error(getErrorMessage(error, "Login failed"));
     }
@@ -106,11 +115,11 @@ const Login = () => {
           </Button>
         </Form>
 
-        <div className="mt-5 text-center">
+        {/* <div className="mt-5 text-center">
           <Text>
             Don't have an account? <Link to={PATHS.REGISTER}>Register</Link>
           </Text>
-        </div>
+        </div> */}
       </Card>
     </div>
   );
