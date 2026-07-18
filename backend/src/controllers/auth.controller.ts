@@ -202,3 +202,15 @@ export const me = async (req: Request, res: Response) => {
     }
 
 }
+
+
+export const getAllUsers = async (req: Request, res: Response) => {
+    try {
+        const users = await User.find().select('-password -refreshToken');
+        sendSuccess({ res, statusCode: 201, message: "Users fetch sucessfully.", data: users })
+    } catch (error) {
+        console.error("Get me error:", error);
+        const message = error instanceof Error ? error.message : "Internal error";
+        sendError({ res, statusCode: 500, message: message })
+    }
+}
