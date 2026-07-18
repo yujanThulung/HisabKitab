@@ -127,11 +127,15 @@ export const getSettlemets = async (req: Request, res: Response) => {
 export const getLatestSettlement = async (req: Request, res: Response) => {
     try {
         const latest = await Settlement.findOne()
-            .sort({ settleAt: -1 })
+            .sort({ settledAt: -1 })
             .lean();
+
         if (!latest) {
-            sendSuccess({ res, statusCode: 200, message: "No settlements found" })
+            sendSuccess({ res, statusCode: 200, message: "No settlements found", data: null });
+            return;
         }
+
+        sendSuccess({ res, statusCode: 200, message: "Latest settlement fetched successfully", data: latest });
     } catch (error) {
         const message = error instanceof Error ? error.message : "Internal error";
         sendError({ res, statusCode: 500, message: message });
