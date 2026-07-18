@@ -1,4 +1,5 @@
 import api from "./axios";
+import axios from "axios";
 
 import type {
     LoginPayload,
@@ -28,10 +29,16 @@ export const register = async (payload: RegisterPayload) => {
 }
 
 export const logout = async () => {
-    await api.post("/logout")
+    await api.post("/auth/logout")
 }
 
+// Uses a plain axios instance (no interceptors) to avoid an infinite refresh loop.
+// If this call fails, the interceptor in axios.ts catches the error and logs the user out.
 export const refreshAccessToken = async (refreshToken: string): Promise<RefreshTokenResponse> => {
-    const response = await api.post("/auth/refresh-token", { refreshToken });
+    const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/auth/refresh-token`,
+        { refreshToken },
+        { headers: { "Content-Type": "application/json" } }
+    );
     return response.data.data;
 }

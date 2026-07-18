@@ -64,12 +64,14 @@ export const settlementApi = {
   },
 
   // POST — backend fetches expenses and computes + saves the settlement
-  createSettlement: async () => {
+  // periodFrom/periodTo are passed from the preview so the backend settles
+  // exactly the same window that was shown to the user.
+  createSettlement: async (body?: { periodFrom: string; periodTo: string }) => {
     const response = await api.post<{
       success: boolean;
       message: string;
       data: SettlementRecord;
-    }>('/settlement/create');
+    }>('/settlement/create', body ?? {});
     return response.data;
   },
 };

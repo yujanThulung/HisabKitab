@@ -49,10 +49,14 @@ export function useSettlement(): UseSettlementReturn {
   const settle = useCallback(async (): Promise<boolean> => {
     setSettling(true);
     try {
-      const res = await settlementApi.createSettlement();
-      // The new record becomes the latest completed settlement
+      // Pass the exact period the user saw in the preview — backend uses these
+      // to fetch and settle the right expense window.
+      const body = preview
+        ? { periodFrom: preview.periodFrom, periodTo: preview.periodTo }
+        : undefined;
+
+      const res = await settlementApi.createSettlement(body);
       setLastSettlement(res.data);
-      // Preview is now empty — the cycle just closed
       setPreview(null);
       toast.success('All settled! New cycle starts from now.');
       return true;
@@ -62,7 +66,7 @@ export function useSettlement(): UseSettlementReturn {
     } finally {
       setSettling(false);
     }
-  }, []);
+  }, [preview]);
 
   return { preview, lastSettlement, loading, settling, refresh: fetchAll, settle };
 }
