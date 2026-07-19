@@ -2,7 +2,7 @@ import { Button, Card, Form, Input, Typography, message } from "antd";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import { PATHS } from "../../constants/route";
 import { useAuthStore } from "../../store/authStore";
